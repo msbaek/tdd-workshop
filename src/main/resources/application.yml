@@ -1,6 +1,11 @@
 spring:
   application:
     name: tdd-workshop
+  docker:
+    compose:
+      lifecycle-management: start_only
+      skip:
+        in-tests: false
 decorator:
   datasource:
     p6spy:
