@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: tdd-workshop
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
