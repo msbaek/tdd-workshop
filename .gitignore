@@ -37,3 +37,4 @@ out/
 .vscode/
 
 .approval_tests_temp
+**/*received.txt
