@@ -2,13 +2,31 @@ package pe.msbaek.tdd_workshop.bowling;
 
 public class BowlingGame {
     
-    private int totalScore = 0;
+    private int[] rolls = new int[21];
+    private int currentRoll = 0;
     
     public void roll(int pins) {
-        totalScore += pins;
+        rolls[currentRoll++] = pins;
     }
     
     public int score() {
-        return totalScore;
+        int score = 0;
+        int rollIndex = 0;
+        
+        for (int frame = 0; frame < 10; frame++) {
+            if (isSpare(rollIndex)) {
+                score += 10 + rolls[rollIndex + 2]; // 스페어 보너스
+                rollIndex += 2;
+            } else {
+                score += rolls[rollIndex] + rolls[rollIndex + 1];
+                rollIndex += 2;
+            }
+        }
+        
+        return score;
+    }
+    
+    private boolean isSpare(int rollIndex) {
+        return rolls[rollIndex] + rolls[rollIndex + 1] == 10;
     }
 }

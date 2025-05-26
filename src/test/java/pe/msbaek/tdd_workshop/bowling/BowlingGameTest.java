@@ -41,4 +41,24 @@ class BowlingGameTest {
         // Then
         assertEquals(20, game.score());
     }
+    
+    @Test
+    @DisplayName("one spare (하나의 프레임만 스페어 처리하고, 다른 프레임은 open인 경우)")
+    void one_spare() {
+        // Given
+        BowlingGame game = new BowlingGame();
+        
+        // When
+        game.roll(5);  // 첫 번째 프레임 첫 투구
+        game.roll(5);  // 첫 번째 프레임 두 번째 투구 (스페어)
+        game.roll(3);  // 두 번째 프레임 첫 투구 (스페어 보너스로 사용됨)
+        
+        // 나머지 투구들은 모두 0
+        for (int i = 0; i < 17; i++) {
+            game.roll(0);
+        }
+        
+        // Then
+        assertEquals(16, game.score()); // 첫 프레임: 10+3=13, 두 번째 프레임: 3, 총 16점
+    }
 }
