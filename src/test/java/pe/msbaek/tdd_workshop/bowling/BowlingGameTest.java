@@ -61,4 +61,24 @@ class BowlingGameTest {
         // Then
         assertEquals(16, game.score()); // 첫 프레임: 10+3=13, 두 번째 프레임: 3, 총 16점
     }
+    
+    @Test
+    @DisplayName("one strike (하나의 프레임만 스트라이크 처리하고, 다른 프레임은 open인 경우)")
+    void one_strike() {
+        // Given
+        BowlingGame game = new BowlingGame();
+        
+        // When
+        game.roll(10); // 첫 번째 프레임 스트라이크
+        game.roll(3);  // 두 번째 프레임 첫 투구 (스트라이크 보너스로 사용됨)
+        game.roll(4);  // 두 번째 프레임 두 번째 투구 (스트라이크 보너스로 사용됨)
+        
+        // 나머지 투구들은 모두 0
+        for (int i = 0; i < 16; i++) {
+            game.roll(0);
+        }
+        
+        // Then
+        assertEquals(24, game.score()); // 첫 프레임: 10+3+4=17, 두 번째 프레임: 7, 총 24점
+    }
 }
