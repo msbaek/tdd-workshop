@@ -2,11 +2,13 @@ package pe.msbaek.tdd_workshop.bowling;
 
 public class BowlingGame {
     
+    private int totalScore = 0;
+    
     public void roll(int pins) {
-        // 현재는 아무것도 하지 않음
+        totalScore += pins;
     }
     
     public int score() {
-        return 0;  // fake it - 가장 단순한 구현
+        return totalScore;
     }
 }

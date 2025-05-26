@@ -26,4 +26,19 @@ class BowlingGameTest {
         // Then
         assertEquals(0, game.score());
     }
+    
+    @Test
+    @DisplayName("all ones (모든 프레임에서 핀을 한개씩만 쓰러뜨린 경우)")
+    void all_ones() {
+        // Given
+        BowlingGame game = new BowlingGame();
+        
+        // When
+        for (int i = 0; i < 20; i++) {
+            game.roll(1);
+        }
+        
+        // Then
+        assertEquals(20, game.score());
+    }
 }
