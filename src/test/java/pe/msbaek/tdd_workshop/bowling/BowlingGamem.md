@@ -166,3 +166,28 @@
 - 적절한 메소드 분리를 통한 가독성 확보
 - 모든 볼링 규칙과 보너스 점수 계산 정확히 구현
 - TDD의 Red-Green-Refactor 사이클을 통한 점진적 개발
+
+## 테스트 코드 리팩터링
+
+### DSL 스타일 테스트 코드 개선
+
+테스트 코드의 중복 제거와 가독성 향상을 위해 DSL(Domain Specific Language) 패턴을 적용했습니다.
+
+**개선 사항:**
+- Fluent Interface 패턴을 통한 자연스러운 테스트 작성
+- `assertScore(expectedScore).when().roll().rollMany()` 형태의 체이닝
+- 테스트 시나리오를 읽기 쉬운 형태로 표현
+- 중복된 BowlingGame 생성과 assertEquals 로직 제거
+- rollMany() 헬퍼 메소드로 반복 투구 간소화
+
+**DSL 구조:**
+- `GameScenario`: 기대 점수와 게임 인스턴스 관리
+- `GameBuilder`: 투구 동작을 체이닝 방식으로 구성
+- `assertScore()`: 테스트 시작점 제공
+- `when()`: 테스트 실행 단계 시작
+- `roll()`, `rollMany()`: 투구 동작 수행
+
+**가독성 향상:**
+- 각 테스트가 "기대점수를 설정하고, 투구를 수행한다"는 자연스러운 흐름으로 표현
+- 주석을 통해 각 투구의 의미(스트라이크, 스페어, 보너스 등) 명확히 표시
+- 복잡한 케이스도 직관적으로 이해 가능한 형태로 작성
