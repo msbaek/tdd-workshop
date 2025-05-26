@@ -15,13 +15,13 @@ public class BowlingGame {
         
         for (int frame = 0; frame < 10; frame++) {
             if (isStrike(rollIndex)) {
-                score += 10 + rolls[rollIndex + 1] + rolls[rollIndex + 2]; // 스트라이크 보너스
+                score += 10 + strikeBonus(rollIndex);
                 rollIndex += 1;
             } else if (isSpare(rollIndex)) {
-                score += 10 + rolls[rollIndex + 2]; // 스페어 보너스
+                score += 10 + spareBonus(rollIndex);
                 rollIndex += 2;
             } else {
-                score += rolls[rollIndex] + rolls[rollIndex + 1];
+                score += sumOfTwoBallsInFrame(rollIndex);
                 rollIndex += 2;
             }
         }
@@ -35,5 +35,17 @@ public class BowlingGame {
     
     private boolean isSpare(int rollIndex) {
         return rolls[rollIndex] + rolls[rollIndex + 1] == 10;
+    }
+    
+    private int strikeBonus(int rollIndex) {
+        return rolls[rollIndex + 1] + rolls[rollIndex + 2];
+    }
+    
+    private int spareBonus(int rollIndex) {
+        return rolls[rollIndex + 2];
+    }
+    
+    private int sumOfTwoBallsInFrame(int rollIndex) {
+        return rolls[rollIndex] + rolls[rollIndex + 1];
     }
 }

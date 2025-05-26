@@ -81,4 +81,19 @@ class BowlingGameTest {
         // Then
         assertEquals(24, game.score()); // 첫 프레임: 10+3+4=17, 두 번째 프레임: 7, 총 24점
     }
+    
+    @Test
+    @DisplayName("perfect game (모든 프레임에서 스트라이크)")
+    void perfect_game() {
+        // Given
+        BowlingGame game = new BowlingGame();
+        
+        // When
+        for (int i = 0; i < 12; i++) { // 10번째 프레임 스트라이크 시 추가 2번의 투구 포함
+            game.roll(10);
+        }
+        
+        // Then
+        assertEquals(300, game.score()); // 퍼펙트 게임: 총 300점
+    }
 }
