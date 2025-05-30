@@ -95,4 +95,11 @@
 가장 단순한 degenerate 케이스로 시작. WordWrap.wrap() 메서드를 생성하고 빈 문자열을 반환하도록 구현.
 테스트는 assertThat().isEmpty()를 사용하여 간단히 검증.
 
+### 4.2 null 문자열 처리 테스트 추가
+
+null 입력 시 빈 문자열을 반환하는 예외 처리 구현
+
+null 체크 조건을 추가하여 NullPointerException을 방지.
+기존 빈 문자열 처리와 동일한 결과를 반환하도록 조건문을 확장.
+
 

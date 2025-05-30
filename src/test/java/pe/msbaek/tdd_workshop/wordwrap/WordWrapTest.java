@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /// - [X] 빈 문자열 처리
-/// - [ ] null 문자열 처리  
+/// - [X] null 문자열 처리  
 /// - [ ] width보다 짧은 단일 단어
 /// - [ ] width와 같은 길이의 단일 단어
 /// - [ ] 줄바꿈이 필요 없는 여러 단어
@@ -17,14 +17,19 @@ class WordWrapTest {
 
     @DisplayName("빈 문자열 처리")
     @Test
-    void empty_string_returns_empty_string() {
-        // given
-        String text = "";
-        int width = 5;
-        
-        // when
+    void wordWrap_should_pass() {
+        assertWraps("", 5);
+    }
+
+    @DisplayName("null 문자열 처리")
+    @Test
+    void null_string_returns_empty_string() {
+        assertWraps(null, 5);
+    }
+
+    private void assertWraps(final String text, final int width) {
         String result = WordWrap.wrap(text, width);
-        
+
         // then
         assertThat(result).isEmpty();
     }
