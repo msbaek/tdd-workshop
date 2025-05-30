@@ -72,4 +72,18 @@
     - 입력: ("The quick brown fox jumps over the lazy dog", 10)
     - 기대 결과: "The quick\nbrown fox\njumps over\nthe lazy\ndog"
 
+## 3. 테스트 케이스 목록
+
+가장 단순한 특수 케이스(degenerate)에서 일반적인 케이스(general)로 진행하는 테스트 리스트:
+
+- [ ] 빈 문자열 처리
+- [ ] null 문자열 처리  
+- [ ] width보다 짧은 단일 단어
+- [ ] width와 같은 길이의 단일 단어
+- [ ] 줄바꿈이 필요 없는 여러 단어
+- [ ] 공백에서 줄바꿈이 필요한 경우
+- [ ] width보다 긴 단어 강제 분할
+- [ ] 연속된 공백 처리
+- [ ] 여러 줄에 걸친 복잡한 텍스트
+
 
