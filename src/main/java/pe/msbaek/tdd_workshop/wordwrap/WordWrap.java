@@ -8,15 +8,15 @@ public class WordWrap {
         }
         
         if (text.length() <= width) {
-            return text;
+            return text.trim();
         }
         
         int spaceIndex = text.lastIndexOf(' ', width);
         if (spaceIndex != -1) {
-            return text.substring(0, spaceIndex) + "\n" + wrap(text.substring(spaceIndex + 1), width);
+            return text.substring(0, spaceIndex).trim() + "\n" + wrap(text.substring(spaceIndex + 1), width);
         }
         
         // 공백이 없으면 강제로 자름
-        return text.substring(0, width) + "\n" + wrap(text.substring(width).trim(), width);
+        return text.substring(0, width).trim() + "\n" + wrap(text.substring(width), width);
     }
 }

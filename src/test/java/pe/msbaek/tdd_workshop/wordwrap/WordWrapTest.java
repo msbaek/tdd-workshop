@@ -71,7 +71,13 @@ class WordWrapTest {
     @DisplayName("연속된 공백 처리")
     @Test
     void handle_multiple_spaces() {
-        assertWraps("hello    world", 12, "hello   \nworld");
+        assertWraps("hello    world", 11, "hello\nworld");
+    }
+
+    @DisplayName("연속된 공백에서 줄바꿈")
+    @Test
+    void handle_multiple_spaces_with_wrapping() {
+        assertWraps("hello    world", 7, "hello\nworld");
     }
 
     private void assertWraps(final String text, final int width, final String expected) {
