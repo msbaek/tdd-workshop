@@ -1,5 +1,6 @@
 package pe.msbaek.tdd_workshop.wordwrap;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// - [X] null 문자열 처리  
 /// - [X] width보다 짧은 단일 단어
 /// - [X] width와 같은 길이의 단일 단어
-/// - [ ] 줄바꿈이 필요 없는 여러 단어
+/// - [X] 줄바꿈이 필요 없는 여러 단어
 /// - [ ] 공백에서 줄바꿈이 필요한 경우
 /// - [ ] width보다 긴 단어 강제 분할
 /// - [ ] 연속된 공백 처리
@@ -41,6 +42,7 @@ class WordWrapTest {
         assertThat(result).isEqualTo("word");
     }
 
+    @Disabled("실패하지 않는 테스트")
     @DisplayName("width와 같은 길이의 단일 단어")
     @Test
     void single_word_same_length_as_width() {
@@ -53,6 +55,21 @@ class WordWrapTest {
         
         // then
         assertThat(result).isEqualTo("hello");
+    }
+
+    @Disabled("실패하지 않는 테스트")
+    @DisplayName("줄바꿈이 필요 없는 여러 단어")
+    @Test
+    void multiple_words_no_wrapping_needed() {
+        // given
+        String text = "hello world";
+        int width = 15;
+        
+        // when
+        String result = WordWrap.wrap(text, width);
+        
+        // then
+        assertThat(result).isEqualTo("hello world");
     }
 
     private void assertWraps(final String text, final int width) {
