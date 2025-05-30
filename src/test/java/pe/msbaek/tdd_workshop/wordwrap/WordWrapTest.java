@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// - [X] 빈 문자열 처리
 /// - [X] null 문자열 처리  
 /// - [X] width보다 짧은 단일 단어
-/// - [ ] width와 같은 길이의 단일 단어
+/// - [X] width와 같은 길이의 단일 단어
 /// - [ ] 줄바꿈이 필요 없는 여러 단어
 /// - [ ] 공백에서 줄바꿈이 필요한 경우
 /// - [ ] width보다 긴 단어 강제 분할
@@ -39,6 +39,20 @@ class WordWrapTest {
         
         // then
         assertThat(result).isEqualTo("word");
+    }
+
+    @DisplayName("width와 같은 길이의 단일 단어")
+    @Test
+    void single_word_same_length_as_width() {
+        // given
+        String text = "hello";
+        int width = 5;
+        
+        // when
+        String result = WordWrap.wrap(text, width);
+        
+        // then
+        assertThat(result).isEqualTo("hello");
     }
 
     private void assertWraps(final String text, final int width) {
