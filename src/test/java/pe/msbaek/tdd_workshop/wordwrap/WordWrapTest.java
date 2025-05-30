@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// - [X] width보다 짧은 단일 단어
 /// - [X] width와 같은 길이의 단일 단어
 /// - [X] 줄바꿈이 필요 없는 여러 단어
-/// - [X] 공백에서 줄바꿈이 필요한 경우
+/// - [ ] 공백에서 줄바꿈이 필요한 경우
 /// - [ ] width보다 긴 단어 강제 분할
 /// - [ ] 연속된 공백 처리
 /// - [ ] 여러 줄에 걸친 복잡한 텍스트
@@ -19,77 +19,54 @@ class WordWrapTest {
     @DisplayName("빈 문자열 처리")
     @Test
     void wordWrap_should_pass() {
-        assertWraps("", 5);
+        assertWraps("", 5, "");
+//        String result = WordWrap.wrap(text, width);
+//
+//        // then
+//        assertThat(result).isEmpty();
     }
 
     @DisplayName("null 문자열 처리")
     @Test
     void null_string_returns_empty_string() {
-        assertWraps(null, 5);
+        assertWraps(null, 5, "");
+//        String result = WordWrap.wrap(text, width);
+//
+//        // then
+//        assertThat(result).isEmpty();
     }
 
     @DisplayName("width보다 짧은 단일 단어")
     @Test
     void single_word_shorter_than_width() {
-        // given
-        String text = "word";
-        int width = 10;
-        
-        // when
-        String result = WordWrap.wrap(text, width);
-        
-        // then
-        assertThat(result).isEqualTo("word");
+        assertWraps("word", 10, "word");
     }
 
     @Disabled("실패하지 않는 테스트")
     @DisplayName("width와 같은 길이의 단일 단어")
     @Test
     void single_word_same_length_as_width() {
-        // given
-        String text = "hello";
-        int width = 5;
-        
-        // when
-        String result = WordWrap.wrap(text, width);
-        
-        // then
-        assertThat(result).isEqualTo("hello");
+        assertWraps("hello", 5, "hello");
     }
 
     @Disabled("실패하지 않는 테스트")
     @DisplayName("줄바꿈이 필요 없는 여러 단어")
     @Test
     void multiple_words_no_wrapping_needed() {
-        // given
-        String text = "hello world";
-        int width = 15;
-        
-        // when
-        String result = WordWrap.wrap(text, width);
-        
-        // then
-        assertThat(result).isEqualTo("hello world");
+        assertWraps("hello world", 15, "hello world");
     }
 
     @DisplayName("공백에서 줄바꿈이 필요한 경우")
     @Test
     void wrapping_at_space_when_needed() {
-        // given
-        String text = "hello world";
-        int width = 7;
-        
-        // when
-        String result = WordWrap.wrap(text, width);
-        
-        // then
-        assertThat(result).isEqualTo("hello\nworld");
+        assertWraps("hello world", 7, "hello\nworld");
     }
 
-    private void assertWraps(final String text, final int width) {
+    private void assertWraps(final String text, final int width, final String expected) {
+        // when
         String result = WordWrap.wrap(text, width);
 
         // then
-        assertThat(result).isEmpty();
+        assertThat(result).isEqualTo(expected);
     }
 }
