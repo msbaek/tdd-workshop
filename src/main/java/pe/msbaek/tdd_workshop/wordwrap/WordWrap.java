@@ -6,6 +6,16 @@ public class WordWrap {
         if (text == null || text.isEmpty()) {
             return "";
         }
+        
+        if (text.length() <= width) {
+            return text;
+        }
+        
+        int spaceIndex = text.lastIndexOf(' ', width);
+        if (spaceIndex != -1) {
+            return text.substring(0, spaceIndex) + "\n" + text.substring(spaceIndex + 1);
+        }
+        
         return text;
     }
 }

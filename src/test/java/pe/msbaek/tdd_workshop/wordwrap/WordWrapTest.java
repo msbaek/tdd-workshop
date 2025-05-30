@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// - [X] width보다 짧은 단일 단어
 /// - [X] width와 같은 길이의 단일 단어
 /// - [X] 줄바꿈이 필요 없는 여러 단어
-/// - [ ] 공백에서 줄바꿈이 필요한 경우
+/// - [X] 공백에서 줄바꿈이 필요한 경우
 /// - [ ] width보다 긴 단어 강제 분할
 /// - [ ] 연속된 공백 처리
 /// - [ ] 여러 줄에 걸친 복잡한 텍스트
@@ -70,6 +70,20 @@ class WordWrapTest {
         
         // then
         assertThat(result).isEqualTo("hello world");
+    }
+
+    @DisplayName("공백에서 줄바꿈이 필요한 경우")
+    @Test
+    void wrapping_at_space_when_needed() {
+        // given
+        String text = "hello world";
+        int width = 7;
+        
+        // when
+        String result = WordWrap.wrap(text, width);
+        
+        // then
+        assertThat(result).isEqualTo("hello\nworld");
     }
 
     private void assertWraps(final String text, final int width) {
