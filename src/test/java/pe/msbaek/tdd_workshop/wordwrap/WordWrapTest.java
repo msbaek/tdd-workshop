@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// - [X] 공백에서 줄바꿈이 필요한 경우
 /// - [X] width보다 긴 단어 강제 분할
 /// - [X] 연속된 공백 처리
-/// - [ ] 여러 줄에 걸친 복잡한 텍스트
+/// - [X] 여러 줄에 걸친 복잡한 텍스트
 class WordWrapTest {
 
     @DisplayName("빈 문자열 처리")
@@ -78,6 +78,12 @@ class WordWrapTest {
     @Test
     void handle_multiple_spaces_with_wrapping() {
         assertWraps("hello    world", 7, "hello\nworld");
+    }
+
+    @DisplayName("여러 줄에 걸친 복잡한 텍스트")
+    @Test
+    void complex_text_multiple_lines() {
+        assertWraps("The quick brown fox jumps over the lazy dog", 10, "The quick\nbrown fox\njumps over\nthe lazy\ndog");
     }
 
     private void assertWraps(final String text, final int width, final String expected) {
