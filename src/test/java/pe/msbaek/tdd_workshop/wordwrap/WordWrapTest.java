@@ -42,14 +42,12 @@ class WordWrapTest {
         assertWraps("word", 10, "word");
     }
 
-    @Disabled("실패하지 않는 테스트")
     @DisplayName("width와 같은 길이의 단일 단어")
     @Test
     void single_word_same_length_as_width() {
         assertWraps("hello", 5, "hello");
     }
 
-    @Disabled("실패하지 않는 테스트")
     @DisplayName("줄바꿈이 필요 없는 여러 단어")
     @Test
     void multiple_words_no_wrapping_needed() {
