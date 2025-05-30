@@ -13,10 +13,10 @@ public class WordWrap {
         
         int spaceIndex = text.lastIndexOf(' ', width);
         if (spaceIndex != -1) {
-            return text.substring(0, spaceIndex) + "\n" + text.substring(spaceIndex + 1);
+            return text.substring(0, spaceIndex) + "\n" + wrap(text.substring(spaceIndex + 1), width);
         }
         
         // 공백이 없으면 강제로 자름
-        return text.substring(0, width) + "\n" + wrap(text.substring(width), width);
+        return text.substring(0, width) + "\n" + wrap(text.substring(width).trim(), width);
     }
 }
