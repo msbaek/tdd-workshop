@@ -10,8 +10,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// - [X] width보다 짧은 단일 단어
 /// - [X] width와 같은 길이의 단일 단어
 /// - [X] 줄바꿈이 필요 없는 여러 단어
-/// - [ ] 공백에서 줄바꿈이 필요한 경우
-/// - [ ] width보다 긴 단어 강제 분할
+/// - [X] 공백에서 줄바꿈이 필요한 경우
+/// - [X] width보다 긴 단어 강제 분할
 /// - [ ] 연속된 공백 처리
 /// - [ ] 여러 줄에 걸친 복잡한 텍스트
 class WordWrapTest {
@@ -60,6 +60,12 @@ class WordWrapTest {
     @Test
     void wrapping_at_space_when_needed() {
         assertWraps("hello world", 7, "hello\nworld");
+    }
+
+    @DisplayName("width보다 긴 단어 강제 분할")
+    @Test
+    void force_wrap_long_word() {
+        assertWraps("programming", 5, "progr\nammin\ng");
     }
 
     private void assertWraps(final String text, final int width, final String expected) {
