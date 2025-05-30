@@ -35,3 +35,41 @@
     - 반환되는 문자열의 각 줄은 width 이하의 길이를 가져야 함
     - 줄바꿈은 `\n` 문자로 표현
     - 마지막 줄의 끝에는 줄바꿈 문자를 포함하지 않음
+
+## 2. SRS를 잘 설명할 수 있는 예제 목록
+
+### 기본 예제들
+
+- **예제1: 빈 문자열/null 처리**
+    - 입력: ("", 5) 또는 (null, 5)
+    - 기대 결과: ""
+
+- **예제2: width보다 짧은 단일 단어**
+    - 입력: ("word", 10)
+    - 기대 결과: "word"
+
+- **예제3: width와 같은 길이의 단어**
+    - 입력: ("hello", 5)
+    - 기대 결과: "hello"
+
+- **예제4: 공백으로 구분된 단어들 (줄바꿈 필요 없음)**
+    - 입력: ("hello world", 15)
+    - 기대 결과: "hello world"
+
+- **예제5: 공백에서 줄바꿈이 필요한 경우**
+    - 입력: ("hello world", 7)
+    - 기대 결과: "hello\nworld"
+
+- **예제6: width보다 긴 단어 강제 분할**
+    - 입력: ("programming", 5)
+    - 기대 결과: "progr\nammin\ng"
+
+- **예제7: 연속된 공백 처리**
+    - 입력: ("hello    world", 12)
+    - 기대 결과: "hello world"
+
+- **예제8: 여러 줄에 걸친 복잡한 텍스트**
+    - 입력: ("The quick brown fox jumps over the lazy dog", 10)
+    - 기대 결과: "The quick\nbrown fox\njumps over\nthe lazy\ndog"
+
+
