@@ -1,5 +1,8 @@
 # BowlingGame TDD 구현
 
+## Related Claude Session
+- https://claude.ai/share/4c840ecb-28a4-4b48-8916-d2127bb651cf
+
 ## 1. **SRS(소프트웨어 요구사항 명세서) 작성**
 
 ### BowlingGame 규칙 및 요구사항
