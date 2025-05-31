@@ -180,4 +180,7 @@ TDD 과정을 통해 구체화되고 명확해진 WordWrap의 실제 요구사�
 이러한 규칙들이 처음부터 명확했다면 TDD 과정에서 중간에 공백 처리 방식을 변경하거나 헤매지 않았을 것임. 
 **"분할은 원본 그대로, 반환은 깔끔하게"**라는 일관된 원칙이 가장 중요한 발견.
 
-
+## 관련 클로드 세션 
+- https://claude.ai/share/ed65a36f-d840-4d16-8408-078485308388
+- **Software ain’t like that. We do the work to discover what work needs doing.**
+  - [Scope Management 101 - by Kent Beck](https://tidyfirst.substack.com/p/scope-management-101)
