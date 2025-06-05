@@ -19,6 +19,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/// - [ ] 빈 장바구니에서 청구서 요청 시 예외 발생
+/// - [ ] 단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)
+/// - [ ] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용
+/// - [ ] 정확히 20,000원 구매 시 10% 할인 적용
 @SpringBootTest
 @AutoConfigureMockMvc
 public class CreateShoppingBasketTest {
