@@ -35,22 +35,38 @@ public class CreateShoppingBasket {
 
     @GetMapping("/{basketId}")
     public BasketDetailsResponse getBasketDetails(@PathVariable String basketId) {
-        // Fake it: 하드코딩으로 테스트만 성공시키기
         Long id = Long.valueOf(basketId);
         Basket basket = basketRepository.findById(id).orElseThrow();
         
-        // 하드코딩된 결과 반환
-        List<BasketItemDto> itemDtos = List.of(
-                new BasketItemDto("충전 케이블", BigDecimal.valueOf(8000), 1, BigDecimal.valueOf(8000))
-        );
+        // 실제 계산으로 변경
+        List<BasketItemDto> itemDtos = basket.getItems().stream()
+                .map(item -> new BasketItemDto(
+                        item.getName(),
+                        item.getPrice(),
+                        item.getQuantity(),
+                        item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
+                ))
+                .toList();
+        
+        // 소계 계산
+        BigDecimal subtotal = itemDtos.stream()
+                .map(BasketItemDto::total)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        // 할인 계산 (10,000원 이하는 할인 없음)
+        BigDecimal discount = BigDecimal.ZERO;
+        String discountRate = "할인 없음";
+        
+        // 최종 금액
+        BigDecimal total = subtotal.subtract(discount);
         
         return new BasketDetailsResponse(
                 basketId,
                 itemDtos,
-                BigDecimal.valueOf(8000),  // 소계
-                BigDecimal.ZERO,           // 할인
-                BigDecimal.valueOf(8000),  // 총액
-                "할인 없음"
+                subtotal,
+                discount,
+                total,
+                discountRate
         );
     }
 

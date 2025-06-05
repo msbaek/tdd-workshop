@@ -116,6 +116,14 @@ classDiagram
 - IllegalArgumentException을 발생시키고 @RestControllerAdvice로 글로벌 예외 처리
 - BadRequest(400) 상태코드와 함께 에러 메시지 반환
 
+### 6.2 단일 상품 추가 테스트 (할인 없음)
+
+단일 상품을 장바구니에 추가하고 할인 없는 영수증 생성 테스트를 구현했습니다.
+
+- 하드코딩된 Controller 로직을 실제 계산 로직으로 변경
+- 상품별 총액 계산 (단가 × 수량) 구현
+- 소계, 할인, 최종 금액 계산 로직 추가
+
 ## 7. **High Level Test 활성화**
 
 ## 8. **Jpa Repository 구현**
