@@ -1,5 +1,23 @@
 # CreateShoppingBasket TDD 구현
 
+## related claude chattings
+### first chat
+- https://claude.ai/share/ec7b96b4-1e93-49cc-b0d9-b3d427b71953
+### second chat: 
+
+```
+jetbrains intellij에 열려있는 파일들을 확인해줘.
+지금 마지막 테스트가 할인이 10%가 적용되어야 하는데, 5%가 적용되어서 실패하고 있어.
+```
+
+```
+test를 실행시켜서 확인해 봐
+```
+        
+```
+이제 8단계인 JPA Repository 구현을 진행해줘
+```
+
 ## 전체적인 절차
 
 ## 1. **SRS(소프트웨어 요구사항 명세서) 작성**
