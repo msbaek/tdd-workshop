@@ -67,6 +67,29 @@
 
 ## 3. **High Level Test 작성**
 
+### 대표 예제 선택
+- 선택된 예제: 예제5 (20,000원 초과 - 10% 할인 적용)
+- 선택 이유: 여러 상품, 수량 처리, 할인 계산 등 가장 많은 제약 조건을 포함하는 일반적인 케이스
+
+### High Level Test 구현
+
+```mermaid
+classDiagram
+    class Basket {
+        +Long id
+        +List~BasketItem~ items
+    }
+    
+    class BasketItem {
+        +String name
+        +BigDecimal price
+        +int quantity
+        +BigDecimal itemTotal
+    }
+    
+    Basket --> BasketItem
+```
+
 ## 4. **테스트 케이스 목록 작성**
 
 ## 5. **Walking Skeleton 구현**
@@ -81,4 +104,4 @@
 
 ## 진행 상황
 
-현재 단계: 2단계 (예제 목록 작성) 완료
+현재 단계: 3단계 (High Level Test 작성) 완료
