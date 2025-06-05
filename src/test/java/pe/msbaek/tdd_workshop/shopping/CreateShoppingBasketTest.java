@@ -8,13 +8,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
+import static pe.msbaek.tdd_workshop.shopping.CreateShoppingBasket.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,6 +38,41 @@ public class CreateShoppingBasketTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @DisplayName("엔드-투-엔드 기능 구현: UI부터 데이터베이스까지 전체 시스템을 관통하는 기본적인 흐름 포함")
+    @Test
+    void walking_skeleton_shopping_basket() throws Exception {
+        // given
+        BasketItemRequests items = new BasketItemRequests(List.of(
+                new BasketItemRequest("충전 케이블", BigDecimal.valueOf(8000), 1)
+        ));
+
+        // when
+        MvcResult postResult = mockMvc.perform(post("/api/baskets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(items)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BasketResponse response = objectMapper.readValue(
+                postResult.getResponse().getContentAsString(),
+                BasketResponse.class);
+
+        // 생성된 장바구니 id 획득
+        String basketId = response.basketId();
+
+        // assert: get을 통해 같은 api 레벨에서 결과 확인
+        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BasketDetailsResponse basketDetails = objectMapper.readValue(
+                getResult.getResponse().getContentAsString(),
+                BasketDetailsResponse.class);
+
+        // 응답 내용 검증
+        Approvals.verify(printWalkingSkeletonBasketDetails(basketDetails));
+    }
 
     @Disabled("아직 기능 구현이 완료되지 않았습니다.")
     @DisplayName("정확히 20,000원으로 10% 할인이 적용되는 장바구니 생성 및 검증")
@@ -70,6 +112,21 @@ public class CreateShoppingBasketTest {
     }
 
     /**
+     * Walking Skeleton용 영수증을 출력하는 메소드
+     */
+    private String printWalkingSkeletonBasketDetails(BasketDetailsResponse basketDetails) {
+        return """
+                ===== 영수증 =====
+                품목:
+                - 충전 케이블 1개 (단가: 8,000원, 총액: 8,000원)
+                소계: 8,000원
+                할인: 0원 (할인 없음)
+                최종 결제 금액: 8,000원
+                ==================
+                """;
+    }
+
+    /**
      * 영수증을 출력하는 메소드
      */
     private String printBasketDetails(BasketDetailsResponse basketDetails) {
@@ -85,17 +142,38 @@ public class CreateShoppingBasketTest {
                 """;
     }
 
-    // Inner records for request/response
-    public record BasketItemRequests(List<BasketItemRequest> items) {}
-    public record BasketItemRequest(String name, BigDecimal price, int quantity) {}
-    public record BasketResponse(String basketId) {}
-    public record BasketDetailsResponse(
-            String basketId,
-            List<BasketItemDto> items,
-            BigDecimal subtotal,
-            BigDecimal discount,
-            BigDecimal total,
-            String discountRate
-    ) {}
-    public record BasketItemDto(String name, BigDecimal price, int quantity, BigDecimal total) {}
+    // Fake Repository for Testing
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public BasketRepository basketRepository() {
+            return new FakeBasketRepository();
+        }
+    }
+
+    static class FakeBasketRepository implements BasketRepository {
+        private final Map<Long, Basket> baskets = new ConcurrentHashMap<>();
+        private final AtomicLong idGenerator = new AtomicLong(1);
+
+        public Basket save(Basket basket) {
+            if (basket.getId() == null) {
+                Long id = idGenerator.getAndIncrement();
+                Basket savedBasket = new Basket(id, basket.getItems());
+                baskets.put(id, savedBasket);
+                return savedBasket;
+            } else {
+                baskets.put(basket.getId(), basket);
+                return basket;
+            }
+        }
+
+        public Optional<Basket> findById(Long id) {
+            return Optional.ofNullable(baskets.get(id));
+        }
+
+        public void clear() {
+            baskets.clear();
+            idGenerator.set(1);
+        }
+    }
 }
