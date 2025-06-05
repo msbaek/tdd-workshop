@@ -1,5 +1,10 @@
 # AI와 Pair로 CreateShoppingBasket Usecase를 TDD로 구현하기
 
+## Claude chatting
+
+- first: https://claude.ai/share/fb917cce-3b60-492b-aa40-79c7cc62fa92
+- second: https://claude.ai/share/30d46a02-a5d9-4bbc-91c3-410edad5dfe2
+
 ## 전체적인 절차
 
 ## 1. **SRS(소프트웨어 요구사항 명세서) 작성**
@@ -69,6 +74,7 @@
 ## 3. **High Level Test 작성**
 
 ### 대표 예제 선택
+
 - 예제1 (정확히 20,000원 - 10% 할인 적용)을 대표 예제로 선택
 - 이 예제는 여러 상품, 할인 적용, 복잡한 계산을 포함하여 요구사항의 제약 조건을 가장 많이 충족함
 - 이 예제를 통해 구현할 기능의 전체적인 흐름과 목표 설계를 파악할 수 있음
@@ -76,18 +82,19 @@
 ### 클래스 다이어그램
 
 #### 도메인 모델
+
 ```mermaid
 classDiagram
     class CreateShoppingBasket {
         +createBasket(BasketItemRequests) BasketResponse
         +getBasketDetails(String basketId) BasketDetailsResponse
     }
-    
+
     class Basket {
         +Long id
         +List~BasketItem~ items
     }
-    
+
     class BasketItem {
         +String name
         +BigDecimal price
@@ -96,6 +103,7 @@ classDiagram
 ```
 
 #### Repository 구조
+
 ```mermaid
 classDiagram
     class BasketRepository {
@@ -103,32 +111,32 @@ classDiagram
         +save(Basket) Basket
         +findById(Long) Optional~Basket~
     }
-    
+
     class BasketRepositoryImpl {
         -BasketRepositoryJpa basketRepositoryJpa
         +save(Basket) Basket
         +findById(Long) Optional~Basket~
     }
-    
+
     class BasketRepositoryJpa {
-        <<interface>>
-        <<Spring Data JPA>>
-    }
-    
-    class FakeBasketRepository {
-        -Map~Long,Basket~ baskets
-        -AtomicLong idGenerator
-        +save(Basket) Basket
-        +findById(Long) Optional~Basket~
-        +clear() void
-    }
-    
-    BasketRepository <|.. BasketRepositoryImpl
-    BasketRepository <|.. FakeBasketRepository
-    BasketRepositoryImpl --> BasketRepositoryJpa
-    BasketRepositoryJpa --|> JpaRepository
-    
-    CreateShoppingBasket --> BasketRepository
+<<interface>>
+<<SpringData JPA>>
+}
+
+class FakeBasketRepository {
+-Map~Long,Basket~ baskets
+-AtomicLong idGenerator
++save(Basket) Basket
++findById(Long) Optional~Basket~
++clear() void
+}
+
+BasketRepository <|.. BasketRepositoryImpl
+BasketRepository <|.. FakeBasketRepository
+BasketRepositoryImpl --> BasketRepositoryJpa
+BasketRepositoryJpa --|> JpaRepository
+
+CreateShoppingBasket --> BasketRepository
 ```
 
 ## 4. **테스트 케이스 목록 작성**
@@ -188,46 +196,48 @@ classDiagram
 Test Data Builder와 Protocol Driver를 적용하여 테스트 코드의 가독성과 재사용성을 크게 개선했습니다.
 
 #### 주요 개선 사항:
+
 1. **Test Data Builder 패턴 적용**
-   - `BasketBuilder`: 장바구니 생성을 위한 fluent interface 제공
-   - `ItemBuilder`: 상품 생성을 위한 builder 패턴
-   - DSL 스타일의 테스트 데이터 생성: `aBasket().withItem(anItem("상품명").withPrice(15000).withQuantity(1))`
+    - `BasketBuilder`: 장바구니 생성을 위한 fluent interface 제공
+    - `ItemBuilder`: 상품 생성을 위한 builder 패턴
+    - DSL 스타일의 테스트 데이터 생성: `aBasket().withItem(anItem("상품명").withPrice(15000).withQuantity(1))`
 
 2. **Protocol Driver 구현**
-   - `BasketApi`: MockMvc 호출을 캡슐화하는 API 계층
-   - 반복되는 HTTP 호출 로직을 하나의 클래스로 집중
-   - 테스트와 시스템 간의 통신 프로토콜을 추상화
+    - `BasketApi`: MockMvc 호출을 캡슐화하는 API 계층
+    - 반복되는 HTTP 호출 로직을 하나의 클래스로 집중
+    - 테스트와 시스템 간의 통신 프로토콜을 추상화
 
 3. **중복 제거 및 가독성 향상**
-   - 각 테스트 메서드가 3줄로 단순화됨 (given & when / then)
-   - 하드코딩된 영수증 출력 메서드들을 하나의 동적 메서드로 통합
-   - Walking Skeleton 테스트 제거 (기존 테스트와 중복)
+    - 각 테스트 메서드가 3줄로 단순화됨 (given & when / then)
+    - 하드코딩된 영수증 출력 메서드들을 하나의 동적 메서드로 통합
+    - Walking Skeleton 테스트 제거 (기존 테스트와 중복)
 
 4. **코드 품질 개선**
-   - 통화 포맷팅 로직 분리 (`formatCurrency` 메서드)
-   - 영수증 출력 로직 개선 (동적 생성)
-   - 에러 처리 로직 명확화
+    - 통화 포맷팅 로직 분리 (`formatCurrency` 메서드)
+    - 영수증 출력 로직 개선 (동적 생성)
+    - 에러 처리 로직 명확화
 
 #### 개선된 테스트 구조:
+
 ```java
 // Before: 복잡하고 중복이 많은 코드
 @Test
 void test() throws Exception {
     BasketItemRequests items = new BasketItemRequests(List.of(
-        new BasketItemRequest("상품명", BigDecimal.valueOf(15000), 1)
+            new BasketItemRequest("상품명", BigDecimal.valueOf(15000), 1)
     ));
-    
+
     MvcResult postResult = mockMvc.perform(post("/api/baskets")...)
     // ... 복잡한 HTTP 호출 및 응답 처리
 }
 
 // After: 간결하고 의도가 명확한 DSL
-@Test  
+@Test
 void test() throws Exception {
     String basketId = basketApi().createBasket(
-        aBasket().withItem(anItem("상품명").withPrice(15000).withQuantity(1))
+            aBasket().withItem(anItem("상품명").withPrice(15000).withQuantity(1))
     );
-    
+
     verifyBasketReceipt(basketApi().getBasketDetails(basketId));
 }
 ```
@@ -241,24 +251,25 @@ Fake Repository로 모든 기능이 동작하는 것을 확인한 후, 실제 �
 #### 주요 구현 사항:
 
 1. **JPA 엔티티 매핑**
-   - `Basket` 엔티티: `@Entity`, `@Id`, `@GeneratedValue` 추가
-   - `BasketItem` 엔티티: `@ManyToOne` 관계 설정
-   - 양방향 연관관계 매핑 및 Cascade 설정
+    - `Basket` 엔티티: `@Entity`, `@Id`, `@GeneratedValue` 추가
+    - `BasketItem` 엔티티: `@ManyToOne` 관계 설정
+    - 양방향 연관관계 매핑 및 Cascade 설정
 
 2. **Spring Data JPA Repository 생성**
-   - `BasketRepositoryJpa`: JpaRepository를 상속하는 인터페이스
-   - Spring Data JPA의 기본 CRUD 기능 활용
+    - `BasketRepositoryJpa`: JpaRepository를 상속하는 인터페이스
+    - Spring Data JPA의 기본 CRUD 기능 활용
 
 3. **Repository 구현체 작성**
-   - `BasketRepositoryImpl`: BasketRepository 인터페이스 구현
-   - BasketRepositoryJpa에 대부분의 작업을 위임
-   - Fake Repository와 JPA Repository 간 쉬운 전환 가능
+    - `BasketRepositoryImpl`: BasketRepository 인터페이스 구현
+    - BasketRepositoryJpa에 대부분의 작업을 위임
+    - Fake Repository와 JPA Repository 간 쉬운 전환 가능
 
 4. **테스트 설정 변경**
-   - `@TestConfiguration` 주석 처리로 JPA Repository 사용
-   - Fake Repository는 테스트 시에만 필요시 활성화 가능
+    - `@TestConfiguration` 주석 처리로 JPA Repository 사용
+    - Fake Repository는 테스트 시에만 필요시 활성화 가능
 
 #### Repository 아키텍처의 장점:
+
 - **유연성**: Fake Repository와 JPA Repository 간 쉬운 전환
 - **테스트 용이성**: 테스트 시 빠른 in-memory repository 사용 가능
 - **확장성**: 새로운 Repository 구현체 추가 용이
