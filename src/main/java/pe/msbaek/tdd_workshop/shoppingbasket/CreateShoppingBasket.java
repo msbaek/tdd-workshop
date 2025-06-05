@@ -49,9 +49,11 @@ public class CreateShoppingBasket {
                 .map(BasketItem::getItemTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
-        // 할인 계산 (TPP 준수 - 최소한의 구현)
+        // 할인 계산 (TPP case 변환 적용)
         BigDecimal discount = BigDecimal.ZERO;
-        if (subtotal.compareTo(BigDecimal.valueOf(10000)) > 0) {
+        if (subtotal.compareTo(BigDecimal.valueOf(20000)) >= 0) {
+            discount = subtotal.multiply(BigDecimal.valueOf(0.1));
+        } else if (subtotal.compareTo(BigDecimal.valueOf(10000)) > 0) {
             discount = subtotal.multiply(BigDecimal.valueOf(0.05));
         }
 
