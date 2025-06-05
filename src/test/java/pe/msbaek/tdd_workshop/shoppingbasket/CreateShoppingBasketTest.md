@@ -114,6 +114,8 @@ Walking Skeleton 테스트는 구현 완료 후 중복으로 인해 삭제됨 (�
 
 ## 8. **Jpa Repository 구현**
 
+JPA Repository 구현을 시작합니다. 현재 FakeBasketRepository를 사용하여 모든 기능이 동작하므로, 이제 실제 JPA Repository로 전환합니다.
+
 ## 6. **테스트 리스트에서 테스트 선택해서 테스트 추가하기(더 이상 추가할 테스트가 없을때까지)**
 
 '<implement-each-test-rule>' 준수

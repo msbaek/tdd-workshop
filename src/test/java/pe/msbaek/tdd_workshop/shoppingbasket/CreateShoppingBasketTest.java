@@ -3,14 +3,11 @@ package pe.msbaek.tdd_workshop.shoppingbasket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.approvaltests.Approvals;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -50,9 +47,9 @@ public class CreateShoppingBasketTest {
     @BeforeEach
     void setup() {
         // 테스트마다 저장소 초기화
-        if (basketRepository instanceof FakeBasketRepository) {
-            ((FakeBasketRepository) basketRepository).clear();
-        }
+        //if (basketRepository instanceof FakeBasketRepository) {
+        //    ((FakeBasketRepository) basketRepository).clear();
+        //}
     }
 
     @DisplayName("단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)")
@@ -216,13 +213,13 @@ public class CreateShoppingBasketTest {
         return sb.toString();
     }
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public BasketRepository basketRepository() {
-            return new FakeBasketRepository();
-        }
-    }
+    //@TestConfiguration
+    //static class TestConfig {
+    //    @Bean
+    //    public BasketRepository basketRepository() {
+    //        return new FakeBasketRepository();
+    //    }
+    //}
 
     static class FakeBasketRepository implements BasketRepository {
         private final Map<Long, Basket> baskets = new ConcurrentHashMap<>();
