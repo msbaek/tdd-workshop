@@ -195,7 +195,6 @@ public class CreateShoppingBasketTest {
         Approvals.verify(printWalkingSkeletonBasketDetails(basketDetails));
     }
 
-    @Disabled("아직 기능 구현이 완료되지 않았습니다.")
     @DisplayName("정확히 20,000원으로 10% 할인이 적용되는 장바구니 생성 및 검증")
     @Test
     void create_and_verify_basket_with_10_percent_discount() throws Exception {
