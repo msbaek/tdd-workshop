@@ -227,9 +227,9 @@ public class CreateShoppingBasketTest {
     }
 
     // Fake Repository for Testing
-    @TestConfiguration
+    // @TestConfiguration  // JPA Repository 사용을 위해 주석 처리
     static class TestConfig {
-        @Bean
+        // @Bean
         public BasketRepository basketRepository() {
             return new FakeBasketRepository();
         }

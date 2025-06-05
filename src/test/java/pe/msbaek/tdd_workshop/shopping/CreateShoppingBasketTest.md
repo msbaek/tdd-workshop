@@ -75,6 +75,7 @@
 
 ### 클래스 다이어그램
 
+#### 도메인 모델
 ```mermaid
 classDiagram
     class CreateShoppingBasket {
@@ -92,6 +93,42 @@ classDiagram
         +BigDecimal price
         +int quantity
     }
+```
+
+#### Repository 구조
+```mermaid
+classDiagram
+    class BasketRepository {
+        <<interface>>
+        +save(Basket) Basket
+        +findById(Long) Optional~Basket~
+    }
+    
+    class BasketRepositoryImpl {
+        -BasketRepositoryJpa basketRepositoryJpa
+        +save(Basket) Basket
+        +findById(Long) Optional~Basket~
+    }
+    
+    class BasketRepositoryJpa {
+        <<interface>>
+        <<Spring Data JPA>>
+    }
+    
+    class FakeBasketRepository {
+        -Map~Long,Basket~ baskets
+        -AtomicLong idGenerator
+        +save(Basket) Basket
+        +findById(Long) Optional~Basket~
+        +clear() void
+    }
+    
+    BasketRepository <|.. BasketRepositoryImpl
+    BasketRepository <|.. FakeBasketRepository
+    BasketRepositoryImpl --> BasketRepositoryJpa
+    BasketRepositoryJpa --|> JpaRepository
+    
+    CreateShoppingBasket --> BasketRepository
 ```
 
 ## 4. **테스트 케이스 목록 작성**
@@ -196,4 +233,36 @@ void test() throws Exception {
 ```
 
 이제 테스트 코드가 훨씬 읽기 쉽고 유지보수하기 좋아졌으며, 새로운 테스트 케이스를 추가할 때 중복 코드 없이 쉽게 작성할 수 있습니다.
+
+### 10. **JPA Repository 구현**
+
+Fake Repository로 모든 기능이 동작하는 것을 확인한 후, 실제 데이터베이스 연동을 위한 JPA Repository를 구현했습니다.
+
+#### 주요 구현 사항:
+
+1. **JPA 엔티티 매핑**
+   - `Basket` 엔티티: `@Entity`, `@Id`, `@GeneratedValue` 추가
+   - `BasketItem` 엔티티: `@ManyToOne` 관계 설정
+   - 양방향 연관관계 매핑 및 Cascade 설정
+
+2. **Spring Data JPA Repository 생성**
+   - `BasketRepositoryJpa`: JpaRepository를 상속하는 인터페이스
+   - Spring Data JPA의 기본 CRUD 기능 활용
+
+3. **Repository 구현체 작성**
+   - `BasketRepositoryImpl`: BasketRepository 인터페이스 구현
+   - BasketRepositoryJpa에 대부분의 작업을 위임
+   - Fake Repository와 JPA Repository 간 쉬운 전환 가능
+
+4. **테스트 설정 변경**
+   - `@TestConfiguration` 주석 처리로 JPA Repository 사용
+   - Fake Repository는 테스트 시에만 필요시 활성화 가능
+
+#### Repository 아키텍처의 장점:
+- **유연성**: Fake Repository와 JPA Repository 간 쉬운 전환
+- **테스트 용이성**: 테스트 시 빠른 in-memory repository 사용 가능
+- **확장성**: 새로운 Repository 구현체 추가 용이
+- **의존성 역전**: 상위 계층이 구체적인 구현이 아닌 인터페이스에 의존
+
+이제 실제 데이터베이스와 연동하여 장바구니 기능을 사용할 수 있습니다. spring-boot-docker-compose를 통해 데이터베이스에 연결하면 모든 기능이 정상 동작합니다.
 
