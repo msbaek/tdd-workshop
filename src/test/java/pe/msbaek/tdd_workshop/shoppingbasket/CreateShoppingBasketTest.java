@@ -143,7 +143,6 @@ public class CreateShoppingBasketTest {
         Approvals.verify(result.getResponse().getContentAsString());
     }
 
-    @Disabled("아직 기능 구현이 완료되지 않았습니다.")
     @DisplayName("여러 상품이 있고 20,000원 초과 시 10% 할인 적용되는 청구서 생성")
     @Test
     void create_and_verify_basket() throws Exception {
@@ -206,7 +205,7 @@ public class CreateShoppingBasketTest {
         sb.append(String.format("소계: %s원\n", subtotalFormatted));
         
         if (basketDetails.discount().compareTo(BigDecimal.ZERO) > 0) {
-            sb.append(String.format("할인: %s원 (5%% 할인)\n", discountFormatted));
+            sb.append(String.format("할인: %s원 (%s)\n", discountFormatted, basketDetails.discountRate()));
         } else {
             sb.append("할인: 0원 (할인 없음)\n");
         }

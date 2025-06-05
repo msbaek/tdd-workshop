@@ -21,20 +21,20 @@ public class CreateShoppingBasket {
         if (requests.items().isEmpty()) {
             throw new IllegalArgumentException("장바구니가 비어있어서 청구서를 생성할 수 없습니다.");
         }
-        
+
         // 여러 상품 처리
         List<BasketItem> items = requests.items().stream()
                 .map(request -> new BasketItem(
-                        request.name(), 
-                        request.price(), 
+                        request.name(),
+                        request.price(),
                         request.quantity(),
                         request.price().multiply(BigDecimal.valueOf(request.quantity()))
                 ))
                 .toList();
-        
+
         Basket basket = new Basket(null, items);
         Basket savedBasket = basketRepository.save(basket);
-        
+
         return new BasketResponse(savedBasket.getId().toString());
     }
 
@@ -43,18 +43,23 @@ public class CreateShoppingBasket {
         // Repository에서 데이터 읽어오기
         Long id = Long.valueOf(basketId);
         Basket basket = basketRepository.findById(id).get();
-        
+
         // 소계 계산
         BigDecimal subtotal = basket.getItems().stream()
                 .map(BasketItem::getItemTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+
         // 할인 계산 (TPP case 변환 적용)
         BigDecimal discount = BigDecimal.ZERO;
+        String discountRate;
         if (subtotal.compareTo(BigDecimal.valueOf(20000)) >= 0) {
             discount = subtotal.multiply(BigDecimal.valueOf(0.1));
+            discountRate = "10% 할인";
         } else if (subtotal.compareTo(BigDecimal.valueOf(10000)) > 0) {
             discount = subtotal.multiply(BigDecimal.valueOf(0.05));
+            discountRate = "5% 할인";
+        } else {
+            discountRate = "할인 없음";
         }
 
         BigDecimal total = subtotal.subtract(discount);
@@ -69,15 +74,20 @@ public class CreateShoppingBasket {
                 itemDtos,
                 subtotal,
                 discount,
-                total
+                total,
+                discountRate
         );
     }
 
     // Request/Response DTOs
     record BasketItemRequests(List<BasketItemRequest> items) {}
+
     record BasketItemRequest(String name, BigDecimal price, int quantity) {}
+
     record BasketResponse(String basketId) {}
+
     record BasketDetailsResponse(String basketId, List<BasketItemDto> items,
-                                 BigDecimal subtotal, BigDecimal discount, BigDecimal total) {}
+                                 BigDecimal subtotal, BigDecimal discount, BigDecimal total, String discountRate) {}
+
     record BasketItemDto(String name, BigDecimal price, int quantity, BigDecimal itemTotal) {}
 }
