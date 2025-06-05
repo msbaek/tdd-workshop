@@ -114,4 +114,4 @@ classDiagram
 
 ## 진행 상황
 
-현재 단계: 4단계 (테스트 케이스 목록 작성) 완료
+현재 단계: 5단계 (Walking Skeleton 구현) 완료
