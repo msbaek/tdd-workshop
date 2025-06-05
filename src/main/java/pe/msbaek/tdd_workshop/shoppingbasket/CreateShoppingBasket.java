@@ -30,15 +30,15 @@ public class CreateShoppingBasket {
 
     @GetMapping("/{basketId}")
     public BasketDetailsResponse getBasketDetails(@PathVariable String basketId) {
-        // Fake it: 하드코딩으로 응답 생성
-        List<BasketItem> responseItems = List.of(
-                new BasketItem("충전 케이블", BigDecimal.valueOf(8000), 1, BigDecimal.valueOf(8000))
-        );
-        
+        // Repository에서 데이터 읽어오기
+        Long id = Long.valueOf(basketId);
+        Basket basket = basketRepository.findById(id).get();
+        final BasketItem basketItem = basket.getItems().get(0);
+
         return new BasketDetailsResponse(
                 basketId,
-                responseItems,
-                BigDecimal.valueOf(8000), // 소계
+                List.of(basketItem),
+                basketItem.getPrice(), // 소계
                 BigDecimal.valueOf(0),    // 할인
                 BigDecimal.valueOf(8000)  // 총액
         );
