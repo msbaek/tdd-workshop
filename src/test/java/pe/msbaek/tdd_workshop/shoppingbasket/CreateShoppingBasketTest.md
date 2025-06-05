@@ -110,16 +110,6 @@ Walking Skeleton 테스트는 구현 완료 후 중복으로 인해 삭제됨 (�
 
 '<implement-each-test-rule>' 준수
 
-## 7. **High Level Test 활성화**
-
-## 8. **Jpa Repository 구현**
-
-JPA Repository 구현을 시작합니다. 현재 FakeBasketRepository를 사용하여 모든 기능이 동작하므로, 이제 실제 JPA Repository로 전환합니다.
-
-## 6. **테스트 리스트에서 테스트 선택해서 테스트 추가하기(더 이상 추가할 테스트가 없을때까지)**
-
-'<implement-each-test-rule>' 준수
-
 ### 6.1 빈 장바구니 예외 테스트 추가
 
 빈 장바구니에서 청구서 요청 시 예외 발생 테스트를 구현했습니다.
@@ -139,6 +129,12 @@ JPA Repository 구현을 시작합니다. 현재 FakeBasketRepository를 사용�
 - 단가 * 수량 계산 로직 추가
 - 영수증 출력 메서드를 동적으로 변경하여 다양한 상품 지원
 - 소계와 총액을 실제 계산된 값으로 사용
+
+## 7. **High Level Test 활성화**
+
+## 8. **Jpa Repository 구현**
+
+JPA Repository 구현을 시작합니다. 현재 FakeBasketRepository를 사용하여 모든 기능이 동작하므로, 이제 실제 JPA Repository로 전환합니다.
 
 ## 진행 상황
 
