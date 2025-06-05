@@ -146,3 +146,54 @@ classDiagram
 
 ## 진행 내역
 
+### 9. **테스트 코드 DSL 개선**
+
+Test Data Builder와 Protocol Driver를 적용하여 테스트 코드의 가독성과 재사용성을 크게 개선했습니다.
+
+#### 주요 개선 사항:
+1. **Test Data Builder 패턴 적용**
+   - `BasketBuilder`: 장바구니 생성을 위한 fluent interface 제공
+   - `ItemBuilder`: 상품 생성을 위한 builder 패턴
+   - DSL 스타일의 테스트 데이터 생성: `aBasket().withItem(anItem("상품명").withPrice(15000).withQuantity(1))`
+
+2. **Protocol Driver 구현**
+   - `BasketApi`: MockMvc 호출을 캡슐화하는 API 계층
+   - 반복되는 HTTP 호출 로직을 하나의 클래스로 집중
+   - 테스트와 시스템 간의 통신 프로토콜을 추상화
+
+3. **중복 제거 및 가독성 향상**
+   - 각 테스트 메서드가 3줄로 단순화됨 (given & when / then)
+   - 하드코딩된 영수증 출력 메서드들을 하나의 동적 메서드로 통합
+   - Walking Skeleton 테스트 제거 (기존 테스트와 중복)
+
+4. **코드 품질 개선**
+   - 통화 포맷팅 로직 분리 (`formatCurrency` 메서드)
+   - 영수증 출력 로직 개선 (동적 생성)
+   - 에러 처리 로직 명확화
+
+#### 개선된 테스트 구조:
+```java
+// Before: 복잡하고 중복이 많은 코드
+@Test
+void test() throws Exception {
+    BasketItemRequests items = new BasketItemRequests(List.of(
+        new BasketItemRequest("상품명", BigDecimal.valueOf(15000), 1)
+    ));
+    
+    MvcResult postResult = mockMvc.perform(post("/api/baskets")...)
+    // ... 복잡한 HTTP 호출 및 응답 처리
+}
+
+// After: 간결하고 의도가 명확한 DSL
+@Test  
+void test() throws Exception {
+    String basketId = basketApi().createBasket(
+        aBasket().withItem(anItem("상품명").withPrice(15000).withQuantity(1))
+    );
+    
+    verifyBasketReceipt(basketApi().getBasketDetails(basketId));
+}
+```
+
+이제 테스트 코드가 훨씬 읽기 쉽고 유지보수하기 좋아졌으며, 새로운 테스트 케이스를 추가할 때 중복 코드 없이 쉽게 작성할 수 있습니다.
+

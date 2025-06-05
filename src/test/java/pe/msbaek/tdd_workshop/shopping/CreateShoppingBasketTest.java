@@ -2,7 +2,6 @@ package pe.msbaek.tdd_workshop.shopping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.approvaltests.Approvals;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,274 +40,190 @@ public class CreateShoppingBasketTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private BasketApi basketApi() {
+        return new BasketApi(mockMvc, objectMapper);
+    }
+
     @DisplayName("정확히 20,000원 구매 시 10% 할인 적용")
     @Test
     void apply_10_percent_discount_for_exactly_20000() throws Exception {
-        // given
-        BasketItemRequests items = new BasketItemRequests(List.of(
-                new BasketItemRequest("스마트폰 케이스", BigDecimal.valueOf(15000), 1),
-                new BasketItemRequest("보호필름", BigDecimal.valueOf(5000), 1)
-        ));
+        // given & when
+        String basketId = basketApi().createBasket(
+                aBasket()
+                        .withItem(anItem("스마트폰 케이스").withPrice(15000).withQuantity(1))
+                        .withItem(anItem("보호필름").withPrice(5000).withQuantity(1))
+        );
 
-        // when
-        MvcResult postResult = mockMvc.perform(post("/api/baskets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(items)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketResponse response = objectMapper.readValue(
-                postResult.getResponse().getContentAsString(),
-                BasketResponse.class);
-
-        String basketId = response.basketId();
-
-        // assert: get을 통해 같은 api 레벨에서 결과 확인
-        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketDetailsResponse basketDetails = objectMapper.readValue(
-                getResult.getResponse().getContentAsString(),
-                BasketDetailsResponse.class);
-
-        // 응답 내용 검증
-        Approvals.verify(print10PercentDiscountBasketDetails(basketDetails));
+        // then
+        verifyBasketReceipt(basketApi().getBasketDetails(basketId));
     }
 
     @DisplayName("10,000원 초과 20,000원 미만 구매 시 5% 할인 적용")
     @Test
     void apply_5_percent_discount_for_amount_between_10000_and_20000() throws Exception {
-        // given
-        BasketItemRequests items = new BasketItemRequests(List.of(
-                new BasketItemRequest("스마트폰 케이스", BigDecimal.valueOf(12000), 1),
-                new BasketItemRequest("보호필름", BigDecimal.valueOf(3000), 1)
-        ));
+        // given & when
+        String basketId = basketApi().createBasket(
+                aBasket()
+                        .withItem(anItem("스마트폰 케이스").withPrice(12000).withQuantity(1))
+                        .withItem(anItem("보호필름").withPrice(3000).withQuantity(1))
+        );
 
-        // when
-        MvcResult postResult = mockMvc.perform(post("/api/baskets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(items)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketResponse response = objectMapper.readValue(
-                postResult.getResponse().getContentAsString(),
-                BasketResponse.class);
-
-        String basketId = response.basketId();
-
-        // assert: get을 통해 같은 api 레벨에서 결과 확인
-        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketDetailsResponse basketDetails = objectMapper.readValue(
-                getResult.getResponse().getContentAsString(),
-                BasketDetailsResponse.class);
-
-        // 응답 내용 검증
-        Approvals.verify(print5PercentDiscountBasketDetails(basketDetails));
+        // then
+        verifyBasketReceipt(basketApi().getBasketDetails(basketId));
     }
 
     @DisplayName("단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)")
     @Test
     void add_single_item_without_discount() throws Exception {
-        // given
-        BasketItemRequests items = new BasketItemRequests(List.of(
-                new BasketItemRequest("충전 케이블", BigDecimal.valueOf(8000), 1)
-        ));
+        // given & when
+        String basketId = basketApi().createBasket(
+                aBasket()
+                        .withItem(anItem("충전 케이블").withPrice(8000).withQuantity(1))
+        );
 
-        // when
-        MvcResult postResult = mockMvc.perform(post("/api/baskets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(items)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketResponse response = objectMapper.readValue(
-                postResult.getResponse().getContentAsString(),
-                BasketResponse.class);
-
-        String basketId = response.basketId();
-
-        // assert: get을 통해 같은 api 레벨에서 결과 확인
-        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketDetailsResponse basketDetails = objectMapper.readValue(
-                getResult.getResponse().getContentAsString(),
-                BasketDetailsResponse.class);
-
-        // 응답 내용 검증
-        Approvals.verify(printSingleItemBasketDetails(basketDetails));
+        // then
+        verifyBasketReceipt(basketApi().getBasketDetails(basketId));
     }
 
     @DisplayName("빈 장바구니에서 청구서 요청 시 예외 발생")
     @Test
     void empty_basket_throws_exception_when_requesting_receipt() throws Exception {
-        // given: 빈 장바구니
-        BasketItemRequests emptyBasket = new BasketItemRequests(List.of());
-
-        // when & then: 예외 발생 검증
-        MvcResult result = mockMvc.perform(post("/api/baskets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(emptyBasket)))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
+        // given & when & then
+        String errorMessage = basketApi().createBasketAndExpectError(aBasket());
+        
         // 에러 메시지 검증
-        Approvals.verify(result.getResponse().getContentAsString());
+        Approvals.verify(errorMessage);
     }
 
-    @DisplayName("엔드-투-엔드 기능 구현: UI부터 데이터베이스까지 전체 시스템을 관통하는 기본적인 흐름 포함")
-    @Test
-    void walking_skeleton_shopping_basket() throws Exception {
-        // given
-        BasketItemRequests items = new BasketItemRequests(List.of(
-                new BasketItemRequest("충전 케이블", BigDecimal.valueOf(8000), 1)
-        ));
 
-        // when
-        MvcResult postResult = mockMvc.perform(post("/api/baskets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(items)))
-                .andExpect(status().isOk())
-                .andReturn();
 
-        BasketResponse response = objectMapper.readValue(
-                postResult.getResponse().getContentAsString(),
-                BasketResponse.class);
-
-        // 생성된 장바구니 id 획득
-        String basketId = response.basketId();
-
-        // assert: get을 통해 같은 api 레벨에서 결과 확인
-        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketDetailsResponse basketDetails = objectMapper.readValue(
-                getResult.getResponse().getContentAsString(),
-                BasketDetailsResponse.class);
-
-        // 응답 내용 검증
-        Approvals.verify(printWalkingSkeletonBasketDetails(basketDetails));
-    }
-
-    @DisplayName("정확히 20,000원으로 10% 할인이 적용되는 장바구니 생성 및 검증")
-    @Test
-    void create_and_verify_basket_with_10_percent_discount() throws Exception {
-        // given
-        BasketItemRequests items = new BasketItemRequests(List.of(
-                new BasketItemRequest("스마트폰 케이스", BigDecimal.valueOf(15000), 1),
-                new BasketItemRequest("보호필름", BigDecimal.valueOf(5000), 1)
-        ));
-
-        // when
-        MvcResult postResult = mockMvc.perform(post("/api/baskets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(items)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketResponse response = objectMapper.readValue(
-                postResult.getResponse().getContentAsString(),
-                BasketResponse.class);
-
-        // 생성된 장바구니 id 획득
-        String basketId = response.basketId();
-
-        // assert: get을 통해 같은 api 레벨에서 결과 확인
-        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketDetailsResponse basketDetails = objectMapper.readValue(
-                getResult.getResponse().getContentAsString(),
-                BasketDetailsResponse.class);
-
-        // 응답 내용 검증
-        Approvals.verify(printBasketDetails(basketDetails));
-    }
-
-    /**
-     * 10% 할인 영수증을 출력하는 메소드
-     */
-    private String print10PercentDiscountBasketDetails(BasketDetailsResponse basketDetails) {
-        return """
-                ===== 영수증 =====
-                품목:
-                - 스마트폰 케이스 1개 (단가: 15,000원, 총액: 15,000원)
-                - 보호필름 1개 (단가: 5,000원, 총액: 5,000원)
-                소계: 20,000원
-                할인: 2,000원 (10% 할인)
-                최종 결제 금액: 18,000원
-                ==================
-                """;
-    }
-
-    /**
-     * 5% 할인 영수증을 출력하는 메소드
-     */
-    private String print5PercentDiscountBasketDetails(BasketDetailsResponse basketDetails) {
-        return """
-                ===== 영수증 =====
-                품목:
-                - 스마트폰 케이스 1개 (단가: 12,000원, 총액: 12,000원)
-                - 보호필름 1개 (단가: 3,000원, 총액: 3,000원)
-                소계: 15,000원
-                할인: 750원 (5% 할인)
-                최종 결제 금액: 14,250원
-                ==================
-                """;
-    }
-
-    /**
-     * 단일 상품 영수증을 출력하는 메소드
-     */
-    private String printSingleItemBasketDetails(BasketDetailsResponse basketDetails) {
-        return """
-                ===== 영수증 =====
-                품목:
-                - 충전 케이블 1개 (단가: 8,000원, 총액: 8,000원)
-                소계: 8,000원
-                할인: 0원 (할인 없음)
-                최종 결제 금액: 8,000원
-                ==================
-                """;
-    }
-
-    /**
-     * Walking Skeleton용 영수증을 출력하는 메소드
-     */
-    private String printWalkingSkeletonBasketDetails(BasketDetailsResponse basketDetails) {
-        return """
-                ===== 영수증 =====
-                품목:
-                - 충전 케이블 1개 (단가: 8,000원, 총액: 8,000원)
-                소계: 8,000원
-                할인: 0원 (할인 없음)
-                최종 결제 금액: 8,000원
-                ==================
-                """;
+    private void verifyBasketReceipt(BasketDetailsResponse basketDetails) {
+        Approvals.verify(printBasketReceipt(basketDetails));
     }
 
     /**
      * 영수증을 출력하는 메소드
      */
-    private String printBasketDetails(BasketDetailsResponse basketDetails) {
-        return """
-                ===== 영수증 =====
-                품목:
-                - 스마트폰 케이스 1개 (단가: 15,000원, 총액: 15,000원)
-                - 보호필름 1개 (단가: 5,000원, 총액: 5,000원)
-                소계: 20,000원
-                할인: 2,000원 (10% 할인)
-                최종 결제 금액: 18,000원
-                ==================
-                """;
+    private String printBasketReceipt(BasketDetailsResponse basketDetails) {
+        StringBuilder receipt = new StringBuilder();
+        receipt.append("===== 영수증 =====\n");
+        receipt.append("품목:\n");
+        
+        for (BasketItemDto item : basketDetails.items()) {
+            receipt.append(String.format("- %s %d개 (단가: %s원, 총액: %s원)\n",
+                    item.name(),
+                    item.quantity(),
+                    formatCurrency(item.price()),
+                    formatCurrency(item.total())
+            ));
+        }
+        
+        receipt.append(String.format("소계: %s원\n", formatCurrency(basketDetails.subtotal())));
+        receipt.append(String.format("할인: %s원 (%s)\n", 
+                formatCurrency(basketDetails.discount()), basketDetails.discountRate()));
+        receipt.append(String.format("최종 결제 금액: %s원\n", formatCurrency(basketDetails.total())));
+        receipt.append("==================");
+        
+        return receipt.toString();
+    }
+
+    private String formatCurrency(BigDecimal amount) {
+        return String.format("%,d", amount.intValue());
+    }
+
+    // Test Data Builders
+    private static BasketBuilder aBasket() {
+        return new BasketBuilder();
+    }
+
+    private static ItemBuilder anItem(String name) {
+        return new ItemBuilder(name);
+    }
+
+    static class BasketBuilder {
+        private final List<BasketItemRequest> items = new ArrayList<>();
+
+        public BasketBuilder withItem(ItemBuilder itemBuilder) {
+            items.add(itemBuilder.build());
+            return this;
+        }
+
+        public BasketItemRequests build() {
+            return new BasketItemRequests(items);
+        }
+    }
+
+    static class ItemBuilder {
+        private final String name;
+        private BigDecimal price = BigDecimal.ZERO;
+        private int quantity = 1;
+
+        public ItemBuilder(String name) {
+            this.name = name;
+        }
+
+        public ItemBuilder withPrice(int price) {
+            this.price = BigDecimal.valueOf(price);
+            return this;
+        }
+
+        public ItemBuilder withQuantity(int quantity) {
+            this.quantity = quantity;
+            return this;
+        }
+
+        public BasketItemRequest build() {
+            return new BasketItemRequest(name, price, quantity);
+        }
+    }
+
+    // Protocol Driver
+    static class BasketApi {
+        private final MockMvc mockMvc;
+        private final ObjectMapper objectMapper;
+
+        public BasketApi(MockMvc mockMvc, ObjectMapper objectMapper) {
+            this.mockMvc = mockMvc;
+            this.objectMapper = objectMapper;
+        }
+
+        public String createBasket(BasketBuilder basketBuilder) throws Exception {
+            return createBasketWithStatus(basketBuilder, status().isOk());
+        }
+
+        public String createBasketAndExpectError(BasketBuilder basketBuilder) throws Exception {
+            MvcResult result = mockMvc.perform(post("/api/baskets")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(basketBuilder.build())))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+
+            return result.getResponse().getContentAsString();
+        }
+
+        private String createBasketWithStatus(BasketBuilder basketBuilder, ResultMatcher status) throws Exception {
+            MvcResult postResult = mockMvc.perform(post("/api/baskets")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(basketBuilder.build())))
+                    .andExpect(status)
+                    .andReturn();
+
+            BasketResponse response = objectMapper.readValue(
+                    postResult.getResponse().getContentAsString(),
+                    BasketResponse.class);
+
+            return response.basketId();
+        }
+
+        public BasketDetailsResponse getBasketDetails(String basketId) throws Exception {
+            MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            return objectMapper.readValue(
+                    getResult.getResponse().getContentAsString(),
+                    BasketDetailsResponse.class);
+        }
     }
 
     // Fake Repository for Testing
