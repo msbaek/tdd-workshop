@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /// - [X] 빈 장바구니에서 청구서 요청 시 예외 발생
-/// - [ ] 단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)
+/// - [X] 단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)
 /// - [ ] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용 (여러 상품)
 /// - [ ] 정확히 20,000원 구매 시 10% 할인 적용
 /// - [ ] 20,000원 초과 구매 시 10% 할인 적용 (여러 상품)
@@ -53,6 +53,41 @@ public class CreateShoppingBasketTest {
         if (basketRepository instanceof FakeBasketRepository) {
             ((FakeBasketRepository) basketRepository).clear();
         }
+    }
+
+    @DisplayName("단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)")
+    @Test
+    void single_item_no_discount_under_10000() throws Exception {
+        // given
+        BasketItemRequests items = new BasketItemRequests(List.of(
+                new BasketItemRequest("보호필름", BigDecimal.valueOf(5000), 1)
+        ));
+
+        // when
+        MvcResult postResult = mockMvc.perform(post("/api/baskets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(items)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BasketResponse response = objectMapper.readValue(
+                postResult.getResponse().getContentAsString(),
+                BasketResponse.class);
+
+        // 생성된 장바구니 id 획득
+        String basketId = response.basketId();
+
+        // assert: get을 통해 같은 api 레벨에서 결과 확인
+        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BasketDetailsResponse basketDetails = objectMapper.readValue(
+                getResult.getResponse().getContentAsString(),
+                BasketDetailsResponse.class);
+
+        // 응답 내용 검증
+        Approvals.verify(printBasketDetails(basketDetails));
     }
 
     @DisplayName("빈 장바구니에서 청구서 요청 시 예외 발생")
@@ -150,31 +185,23 @@ public class CreateShoppingBasketTest {
      * 영수증을 출력하는 메소드
      */
     private String printBasketDetails(BasketDetailsResponse basketDetails) {
-        // Walking Skeleton용으로 하드코딩
-        if (basketDetails.items().size() == 1 && 
-            basketDetails.items().get(0).name().equals("충전 케이블")) {
-            return """
-                    ===== 영수증 =====
-                    품목:
-                    - 충전 케이블 1개 (단가: 8,000원, 총액: 8,000원)
-                    소계: 8,000원
-                    할인: 0원 (할인 없음)
-                    최종 결제 금액: 8,000원
-                    ==================
-                    """;
-        }
+        BasketItem item = basketDetails.items().get(0);
+        String itemName = item.name();
+        int quantity = item.quantity();
+        String priceFormatted = String.format("%,d", item.price().intValue());
+        String totalFormatted = String.format("%,d", item.itemTotal().intValue());
+        String subtotalFormatted = String.format("%,d", basketDetails.subtotal().intValue());
+        String finalTotalFormatted = String.format("%,d", basketDetails.total().intValue());
         
-        return """
+        return String.format("""
                 ===== 영수증 =====
                 품목:
-                - 스마트폰 케이스 1개 (단가: 15,000원, 총액: 15,000원)
-                - 보호필름 2개 (단가: 5,000원, 총액: 10,000원)
-                - 충전 케이블 1개 (단가: 8,000원, 총액: 8,000원)
-                소계: 33,000원
-                할인: 3,300원 (10% 할인)
-                최종 결제 금액: 29,700원
+                - %s %d개 (단가: %s원, 총액: %s원)
+                소계: %s원
+                할인: 0원 (할인 없음)
+                최종 결제 금액: %s원
                 ==================
-                """;
+                """, itemName, quantity, priceFormatted, totalFormatted, subtotalFormatted, finalTotalFormatted);
     }
 
     @TestConfiguration

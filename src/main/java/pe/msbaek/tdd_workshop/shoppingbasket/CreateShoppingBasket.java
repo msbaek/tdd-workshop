@@ -22,9 +22,11 @@ public class CreateShoppingBasket {
             throw new IllegalArgumentException("장바구니가 비어있어서 청구서를 생성할 수 없습니다.");
         }
         
-        // Fake it: 하드코딩으로 장바구니 생성
+        // Triangulation: 이제 두 개의 테스트가 있으므로 일반화
+        BasketItemRequest firstItem = requests.items().get(0);
         List<BasketItem> items = List.of(
-                new BasketItem("충전 케이블", BigDecimal.valueOf(8000), 1, BigDecimal.valueOf(8000))
+                new BasketItem(firstItem.name(), firstItem.price(), firstItem.quantity(), 
+                              firstItem.price().multiply(BigDecimal.valueOf(firstItem.quantity())))
         );
         
         Basket basket = new Basket(null, items);
@@ -43,9 +45,9 @@ public class CreateShoppingBasket {
         return new BasketDetailsResponse(
                 basketId,
                 List.of(basketItem),
-                basketItem.getPrice(), // 소계
-                BigDecimal.valueOf(0),    // 할인
-                BigDecimal.valueOf(8000)  // 총액
+                basketItem.getItemTotal(), // 소계 (실제 계산된 값)
+                BigDecimal.valueOf(0),     // 할인 (아직 Fake it)
+                basketItem.getItemTotal()  // 총액 (할인 없으므로 소계와 동일)
         );
     }
 
