@@ -108,6 +108,14 @@ classDiagram
 
 ## 6. **테스트 리스트에서 테스트 선택해서 테스트 추가하기(더 이상 추가할 테스트가 없을때까지)**
 
+### 6.1 빈 장바구니 예외 처리 테스트 추가
+
+빈 장바구니에서 영수증 생성 요청 시 예외 발생 테스트를 구현했습니다.
+
+- 가장 단순한 degenerate case부터 시작
+- IllegalArgumentException을 발생시키고 @RestControllerAdvice로 글로벌 예외 처리
+- BadRequest(400) 상태코드와 함께 에러 메시지 반환
+
 ## 7. **High Level Test 활성화**
 
 ## 8. **Jpa Repository 구현**

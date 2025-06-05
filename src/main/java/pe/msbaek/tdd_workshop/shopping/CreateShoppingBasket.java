@@ -17,6 +17,11 @@ public class CreateShoppingBasket {
 
     @PostMapping
     public BasketResponse createBasket(@RequestBody BasketItemRequests requests) {
+        // 빈 장바구니 검증
+        if (requests.items() == null || requests.items().isEmpty()) {
+            throw new IllegalArgumentException("장바구니가 비어 있어서 영수증을 생성할 수 없습니다.");
+        }
+        
         // Fake it: 하드코딩으로 테스트만 성공시키기
         List<BasketItem> items = requests.items().stream()
                 .map(req -> new BasketItem(req.name(), req.price(), req.quantity()))
