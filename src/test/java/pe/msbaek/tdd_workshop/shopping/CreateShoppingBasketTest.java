@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /// - [X] 빈 장바구니에서 청구서 요청 시 예외 발생
 /// - [X] 단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)
-/// - [ ] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용
+/// - [X] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용
 /// - [ ] 정확히 20,000원 구매 시 10% 할인 적용
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,6 +38,41 @@ public class CreateShoppingBasketTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @DisplayName("10,000원 초과 20,000원 미만 구매 시 5% 할인 적용")
+    @Test
+    void apply_5_percent_discount_for_amount_between_10000_and_20000() throws Exception {
+        // given
+        BasketItemRequests items = new BasketItemRequests(List.of(
+                new BasketItemRequest("스마트폰 케이스", BigDecimal.valueOf(12000), 1),
+                new BasketItemRequest("보호필름", BigDecimal.valueOf(3000), 1)
+        ));
+
+        // when
+        MvcResult postResult = mockMvc.perform(post("/api/baskets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(items)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BasketResponse response = objectMapper.readValue(
+                postResult.getResponse().getContentAsString(),
+                BasketResponse.class);
+
+        String basketId = response.basketId();
+
+        // assert: get을 통해 같은 api 레벨에서 결과 확인
+        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BasketDetailsResponse basketDetails = objectMapper.readValue(
+                getResult.getResponse().getContentAsString(),
+                BasketDetailsResponse.class);
+
+        // 응답 내용 검증
+        Approvals.verify(print5PercentDiscountBasketDetails(basketDetails));
+    }
 
     @DisplayName("단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)")
     @Test
@@ -160,6 +195,22 @@ public class CreateShoppingBasketTest {
 
         // 응답 내용 검증
         Approvals.verify(printBasketDetails(basketDetails));
+    }
+
+    /**
+     * 5% 할인 영수증을 출력하는 메소드
+     */
+    private String print5PercentDiscountBasketDetails(BasketDetailsResponse basketDetails) {
+        return """
+                ===== 영수증 =====
+                품목:
+                - 스마트폰 케이스 1개 (단가: 12,000원, 총액: 12,000원)
+                - 보호필름 1개 (단가: 3,000원, 총액: 3,000원)
+                소계: 15,000원
+                할인: 750원 (5% 할인)
+                최종 결제 금액: 14,250원
+                ==================
+                """;
     }
 
     /**
