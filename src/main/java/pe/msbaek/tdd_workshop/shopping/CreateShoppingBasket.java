@@ -57,7 +57,11 @@ public class CreateShoppingBasket {
         BigDecimal discount = BigDecimal.ZERO;
         String discountRate = "할인 없음";
         
-        if (subtotal.compareTo(BigDecimal.valueOf(10000)) > 0 && subtotal.compareTo(BigDecimal.valueOf(20000)) < 0) {
+        if (subtotal.compareTo(BigDecimal.valueOf(20000)) >= 0) {
+            // 20,000원 이상: 10% 할인
+            discount = subtotal.multiply(BigDecimal.valueOf(0.10));
+            discountRate = "10% 할인";
+        } else if (subtotal.compareTo(BigDecimal.valueOf(10000)) > 0) {
             // 10,000원 초과 20,000원 미만: 5% 할인
             discount = subtotal.multiply(BigDecimal.valueOf(0.05));
             discountRate = "5% 할인";
