@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /// - [X] 빈 장바구니에서 청구서 요청 시 예외 발생
 /// - [X] 단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)
-/// - [ ] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용 (여러 상품)
+/// - [X] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용 (여러 상품)
 /// - [ ] 정확히 20,000원 구매 시 10% 할인 적용
 /// - [ ] 20,000원 초과 구매 시 10% 할인 적용 (여러 상품)
 @SpringBootTest
@@ -60,6 +60,42 @@ public class CreateShoppingBasketTest {
     void single_item_no_discount_under_10000() throws Exception {
         // given
         BasketItemRequests items = new BasketItemRequests(List.of(
+                new BasketItemRequest("보호필름", BigDecimal.valueOf(5000), 1)
+        ));
+
+        // when
+        MvcResult postResult = mockMvc.perform(post("/api/baskets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(items)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BasketResponse response = objectMapper.readValue(
+                postResult.getResponse().getContentAsString(),
+                BasketResponse.class);
+
+        // 생성된 장바구니 id 획득
+        String basketId = response.basketId();
+
+        // assert: get을 통해 같은 api 레벨에서 결과 확인
+        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BasketDetailsResponse basketDetails = objectMapper.readValue(
+                getResult.getResponse().getContentAsString(),
+                BasketDetailsResponse.class);
+
+        // 응답 내용 검증
+        Approvals.verify(printBasketDetails(basketDetails));
+    }
+
+    @DisplayName("10,000원 초과 20,000원 미만 구매 시 5% 할인 적용 (여러 상품)")
+    @Test
+    void multiple_items_5_percent_discount_over_10000_under_20000() throws Exception {
+        // given
+        BasketItemRequests items = new BasketItemRequests(List.of(
+                new BasketItemRequest("스마트폰 케이스", BigDecimal.valueOf(12000), 1),
                 new BasketItemRequest("보호필름", BigDecimal.valueOf(5000), 1)
         ));
 
@@ -150,23 +186,35 @@ public class CreateShoppingBasketTest {
      * 영수증을 출력하는 메소드
      */
     private String printBasketDetails(BasketDetailsResponse basketDetails) {
-        BasketItem item = basketDetails.items().get(0);
-        String itemName = item.name();
-        int quantity = item.quantity();
-        String priceFormatted = String.format("%,d", item.price().intValue());
-        String totalFormatted = String.format("%,d", item.itemTotal().intValue());
+        StringBuilder sb = new StringBuilder();
+        sb.append("===== 영수증 =====\n");
+        sb.append("품목:\n");
+        
+        for (CreateShoppingBasket.BasketItemDto item : basketDetails.items()) {
+            String itemName = item.name();
+            int quantity = item.quantity();
+            String priceFormatted = String.format("%,d", item.price().intValue());
+            String totalFormatted = String.format("%,d", item.itemTotal().intValue());
+            sb.append(String.format("- %s %d개 (단가: %s원, 총액: %s원)\n", 
+                    itemName, quantity, priceFormatted, totalFormatted));
+        }
+        
         String subtotalFormatted = String.format("%,d", basketDetails.subtotal().intValue());
+        String discountFormatted = String.format("%,d", basketDetails.discount().intValue());
         String finalTotalFormatted = String.format("%,d", basketDetails.total().intValue());
         
-        return String.format("""
-                ===== 영수증 =====
-                품목:
-                - %s %d개 (단가: %s원, 총액: %s원)
-                소계: %s원
-                할인: 0원 (할인 없음)
-                최종 결제 금액: %s원
-                ==================
-                """, itemName, quantity, priceFormatted, totalFormatted, subtotalFormatted, finalTotalFormatted);
+        sb.append(String.format("소계: %s원\n", subtotalFormatted));
+        
+        if (basketDetails.discount().compareTo(BigDecimal.ZERO) > 0) {
+            sb.append(String.format("할인: %s원 (5%% 할인)\n", discountFormatted));
+        } else {
+            sb.append("할인: 0원 (할인 없음)\n");
+        }
+        
+        sb.append(String.format("최종 결제 금액: %s원\n", finalTotalFormatted));
+        sb.append("==================");
+        
+        return sb.toString();
     }
 
     @TestConfiguration
