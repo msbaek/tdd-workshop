@@ -112,6 +112,20 @@ classDiagram
 
 ## 8. **Jpa Repository 구현**
 
+## 6. **테스트 리스트에서 테스트 선택해서 테스트 추가하기(더 이상 추가할 테스트가 없을때까지)**
+
+'<implement-each-test-rule>' 준수
+
+### 6.1 빈 장바구니 예외 테스트 추가
+
+빈 장바구니에서 청구서 요청 시 예외 발생 테스트를 구현했습니다.
+
+- 가장 단순한 degenerate 케이스부터 시작
+- 예외 상황에 대한 명확한 에러 메시지 제공
+- @RestControllerAdvice로 전역 예외 처리 구현
+- IllegalArgumentException을 400 Bad Request로 변환
+- Approvals test로 에러 메시지 검증
+
 ## 진행 상황
 
-현재 단계: 5단계 (Walking Skeleton 구현) 완료
+현재 단계: 6단계 (테스트 추가하기) 진행 중 - 1/5 완료

@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/// - [ ] 빈 장바구니에서 청구서 요청 시 예외 발생
+/// - [X] 빈 장바구니에서 청구서 요청 시 예외 발생
 /// - [ ] 단일 상품을 1개만 장바구니에 추가 (할인 없음, 10,000원 이하)
 /// - [ ] 10,000원 초과 20,000원 미만 구매 시 5% 할인 적용 (여러 상품)
 /// - [ ] 정확히 20,000원 구매 시 10% 할인 적용
@@ -53,6 +53,23 @@ public class CreateShoppingBasketTest {
         if (basketRepository instanceof FakeBasketRepository) {
             ((FakeBasketRepository) basketRepository).clear();
         }
+    }
+
+    @DisplayName("빈 장바구니에서 청구서 요청 시 예외 발생")
+    @Test
+    void empty_basket_throws_exception_when_requesting_receipt() throws Exception {
+        // given: 빈 장바구니
+        BasketItemRequests emptyBasket = new BasketItemRequests(List.of());
+
+        // when & then: 예외 발생 검증
+        MvcResult result = mockMvc.perform(post("/api/baskets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(emptyBasket)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        // 에러 메시지 검증
+        Approvals.verify(result.getResponse().getContentAsString());
     }
 
     @DisplayName("엔드-투-엔드 기능 구현: UI부터 데이터베이스까지 전체 시스템을 관통하는 기본적인 흐름 포함")

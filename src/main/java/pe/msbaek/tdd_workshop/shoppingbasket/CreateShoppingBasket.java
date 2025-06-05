@@ -17,6 +17,11 @@ public class CreateShoppingBasket {
 
     @PostMapping
     public BasketResponse createBasket(@RequestBody BasketItemRequests requests) {
+        // 빈 장바구니 체크
+        if (requests.items().isEmpty()) {
+            throw new IllegalArgumentException("장바구니가 비어있어서 청구서를 생성할 수 없습니다.");
+        }
+        
         // Fake it: 하드코딩으로 장바구니 생성
         List<BasketItem> items = List.of(
                 new BasketItem("충전 케이블", BigDecimal.valueOf(8000), 1, BigDecimal.valueOf(8000))
