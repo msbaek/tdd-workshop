@@ -104,6 +104,8 @@ classDiagram
 
 ## 5. **Walking Skeleton 구현**
 
+Walking Skeleton 테스트는 구현 완료 후 중복으로 인해 삭제됨 (단일 상품 테스트와 동일한 비즈니스 규칙)
+
 ## 6. **테스트 리스트에서 테스트 선택해서 테스트 추가하기(더 이상 추가할 테스트가 없을때까지)**
 
 '<implement-each-test-rule>' 준수

@@ -107,41 +107,6 @@ public class CreateShoppingBasketTest {
         Approvals.verify(result.getResponse().getContentAsString());
     }
 
-    @DisplayName("엔드-투-엔드 기능 구현: UI부터 데이터베이스까지 전체 시스템을 관통하는 기본적인 흐름 포함")
-    @Test
-    void walking_skeleton_shopping_basket() throws Exception {
-        // given
-        BasketItemRequests items = new BasketItemRequests(List.of(
-                new BasketItemRequest("충전 케이블", BigDecimal.valueOf(8000), 1)
-        ));
-
-        // when
-        MvcResult postResult = mockMvc.perform(post("/api/baskets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(items)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketResponse response = objectMapper.readValue(
-                postResult.getResponse().getContentAsString(),
-                BasketResponse.class);
-
-        // 생성된 장바구니 id 획득
-        String basketId = response.basketId();
-
-        // assert: get을 통해 같은 api 레벨에서 결과 확인
-        MvcResult getResult = mockMvc.perform(get("/api/baskets/" + basketId))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BasketDetailsResponse basketDetails = objectMapper.readValue(
-                getResult.getResponse().getContentAsString(),
-                BasketDetailsResponse.class);
-
-        // 응답 내용 검증
-        Approvals.verify(printBasketDetails(basketDetails));
-    }
-
     @Disabled("아직 기능 구현이 완료되지 않았습니다.")
     @DisplayName("여러 상품이 있고 20,000원 초과 시 10% 할인 적용되는 청구서 생성")
     @Test
