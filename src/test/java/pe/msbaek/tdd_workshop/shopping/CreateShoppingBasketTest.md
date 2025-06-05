@@ -68,6 +68,32 @@
 
 ## 3. **High Level Test 작성**
 
+### 대표 예제 선택
+- 예제1 (정확히 20,000원 - 10% 할인 적용)을 대표 예제로 선택
+- 이 예제는 여러 상품, 할인 적용, 복잡한 계산을 포함하여 요구사항의 제약 조건을 가장 많이 충족함
+- 이 예제를 통해 구현할 기능의 전체적인 흐름과 목표 설계를 파악할 수 있음
+
+### 클래스 다이어그램
+
+```mermaid
+classDiagram
+    class CreateShoppingBasket {
+        +createBasket(BasketItemRequests) BasketResponse
+        +getBasketDetails(String basketId) BasketDetailsResponse
+    }
+    
+    class Basket {
+        +Long id
+        +List~BasketItem~ items
+    }
+    
+    class BasketItem {
+        +String name
+        +BigDecimal price
+        +int quantity
+    }
+```
+
 ## 4. **테스트 케이스 목록 작성**
 
 ## 5. **Walking Skeleton 구현**
